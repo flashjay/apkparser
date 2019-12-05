@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/shogo82148/androidbinary/apk"
 	"log"
 	"os"
 )
 
 import (
 	"github.com/lunny/axmlParser"
+	"github.com/shogo82148/androidbinary/apk"
 )
 
 type apkFileInfo struct {
