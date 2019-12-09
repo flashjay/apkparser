@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/png"
 	"log"
 	"os"
 )
@@ -13,6 +14,7 @@ import (
 
 type apkFileInfo struct {
 	File         string
+	Icon         *os.File
 	Label        string
 	VersionName  string
 	VersionCode  string
@@ -32,7 +34,9 @@ func (f apkFileInfo) String() string {
 		"VersionName => %v\n"+
 		"VersionCode => %v\n"+
 		"PackageName => %v\n"+
-		"ActivityName => %v", f.File, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName)
+		"ActivityName => %v\n"+
+		"Icon => %v",
+		f.File, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName, f.Icon.Name())
 }
 
 func main() {
@@ -53,6 +57,8 @@ func main() {
 	defer pkg.Close()
 
 	f.Label, _ = pkg.Label(nil)
-
+	icon, _ := pkg.Icon(nil)
+	f.Icon, _ = os.Create(f.File[0:len(f.File)-4] + ".ico")
+	png.Encode(f.Icon, icon)
 	fmt.Println(f)
 }
