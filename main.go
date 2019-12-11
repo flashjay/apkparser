@@ -5,16 +5,14 @@ import (
 	"image/png"
 	"log"
 	"os"
-)
 
-import (
 	"github.com/lunny/axmlParser"
 	"github.com/shogo82148/androidbinary/apk"
 )
 
 type apkFileInfo struct {
 	File         string
-	Icon         *os.File
+	Icon         string
 	Label        string
 	VersionName  string
 	VersionCode  string
@@ -36,7 +34,7 @@ func (f apkFileInfo) String() string {
 		"PackageName => %v\n"+
 		"ActivityName => %v\n"+
 		"Icon => %v",
-		f.File, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName, f.Icon.Name())
+		f.File, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName, f.Icon)
 }
 
 func main() {
@@ -57,8 +55,13 @@ func main() {
 	defer pkg.Close()
 
 	f.Label, _ = pkg.Label(nil)
-	icon, _ := pkg.Icon(nil)
-	f.Icon, _ = os.Create(f.File[0:len(f.File)-4] + ".ico")
-	png.Encode(f.Icon, icon)
+	dat, err := pkg.Icon(nil)
+	if err == nil {
+		ico, _ := os.Create(f.File[0:len(f.File)-4] + ".ico")
+		png.Encode(ico, dat)
+		f.Icon = ico.Name()
+	} else {
+		f.Icon = fmt.Sprintf("## Error {%v}", err)
+	}
 	fmt.Println(f)
 }
