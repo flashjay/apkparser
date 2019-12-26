@@ -12,6 +12,7 @@ import (
 
 type apkFileInfo struct {
 	File         string
+	Size         int64
 	Icon         string
 	Label        string
 	VersionName  string
@@ -27,14 +28,17 @@ func (f *apkFileInfo) checkError(err error) {
 }
 
 func (f apkFileInfo) String() string {
-	return fmt.Sprintf("File => %v\n"+
-		"Label => %v\n"+
-		"VersionName => %v\n"+
-		"VersionCode => %v\n"+
-		"PackageName => %v\n"+
-		"ActivityName => %v\n"+
-		"Icon => %v",
-		f.File, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName, f.Icon)
+	return fmt.Sprintf(`{
+	"File": "%v",
+	"Size": %v,
+	"Label": "%v",
+	"VersionName": "%v",
+	"VersionCode": "%v",
+	"PackageName": "%v",
+	"ActivityName": "%v",
+	"Icon": "%v"
+}`,
+		f.File, f.Size, f.Label, f.VersionName, f.VersionCode, f.PackageName, f.ActivityName, f.Icon)
 }
 
 func main() {
@@ -42,7 +46,12 @@ func main() {
 	listener := new(axmlParser.AppNameListener)
 	f.File = os.Args[1]
 
-	_, err := axmlParser.ParseApk(f.File, listener)
+	fi, err := os.Stat(f.File)
+	f.checkError(err)
+
+	f.Size = fi.Size()
+
+	_, err = axmlParser.ParseApk(f.File, listener)
 	f.checkError(err)
 	if err == nil {
 		f.VersionName = listener.VersionName
@@ -61,7 +70,7 @@ func main() {
 		png.Encode(ico, dat)
 		f.Icon = ico.Name()
 	} else {
-		f.Icon = fmt.Sprintf("## Error {%v}", err)
+		f.Icon = ""
 	}
 	fmt.Println(f)
 }
